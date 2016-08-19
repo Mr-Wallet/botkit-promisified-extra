@@ -1,0 +1,29 @@
+{
+  "name": "botkit-promisified-extra",
+  "version": "0.0.1",
+  "description": "A wrapper for howdyai/botkit using promises and with additional helper methods and logging",
+  "keywords": "botkit promisified promise slack bot",
+  "main": "main.js",
+  "dependencies": {
+    "bluebird": "~3.1.1",
+    "botkit": "~0.2.2",
+    "lodash": "~4.14.1",
+    "moment": "~2.14.1"
+  },
+  "devDependencies": {
+    "eslint": "~2.13.1",
+    "eslint-config-airbnb": "~9.0.1",
+    "eslint-plugin-import": "~1.9.2",
+    "eslint-plugin-react": "~5.2.2",
+    "eslint-plugin-jsx-a11y": "~1.5.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mr-Wallet/botkit-promisified-extra.git"
+  },
+  "scripts": {
+    "start": "node main.js"
+  },
+  "author": "Jordan Wallet <jjwallet@gmail.com>",
+  "license": "MIT"
+}
