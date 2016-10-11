@@ -16,9 +16,7 @@ const ApiListMethodResultKeys = {
   [USERS]: 'members'
 };
 
-module.exports = (controller, bot, LOGGING_LEVEL = 1) => {
-  const Util = require('./Util.js')(LOGGING_LEVEL); // eslint-disable-line global-require
-
+module.exports = (controller, bot, LOGGING_LEVEL = 1, { log }) => {
   function get(type) {
     return (id) => controller.storage[type].getAsync(id);
   }
@@ -55,7 +53,7 @@ module.exports = (controller, bot, LOGGING_LEVEL = 1) => {
         .then((data = {}) => {
           if (!data) {
             const errorMessage = `User ${id} was not found`;
-            Util.log('Database.update', errorMessage, ONLY_ERROR_LOGGING);
+            log('Database.update', errorMessage, ONLY_ERROR_LOGGING);
             throw new Error(errorMessage);
           }
 

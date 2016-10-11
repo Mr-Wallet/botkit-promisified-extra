@@ -1,12 +1,17 @@
-module.exports = (controller, bot, LOGGING_LEVEL) => {
-  /* eslint-disable global-require */
-  const Database = require('./Database.js')(controller, bot, LOGGING_LEVEL);
-  /* eslint-enable global-require */
+const _ = require('lodash');
 
+const {
+  VERBOSE_LOGGING
+} = require('../resources/constants');
+
+module.exports = (controller, bot, LOGGING_LEVEL, { log }) => {
   const Message = {
     private: (user, text) =>
       bot.api.im.openAsync({ user })
-        .then((response) => bot.api.chat.postMessageAsync({ as_user: true, channel: response.channel.id, text }))
+        .then((response) => {
+          log('Message.private', `Sending to ${user}: ${_.truncate(text)}`, VERBOSE_LOGGING);
+          return bot.api.chat.postMessageAsync({ as_user: true, channel: response.channel.id, text });
+        })
   };
 
   return Message;

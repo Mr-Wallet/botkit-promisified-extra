@@ -26,9 +26,9 @@ const bot = controller.spawn({
   token: BOT_TOKEN
 });
 
-const Database = require('./source/Database.js')(controller, bot, LOGGING_LEVEL);
-const Message = require('./source/Message.js')(controller, bot, LOGGING_LEVEL);
 const Util = require('./source/Util.js')(controller, bot, LOGGING_LEVEL);
+const Database = require('./source/Database.js')(controller, bot, LOGGING_LEVEL, Util);
+const Message = require('./source/Message.js')(controller, bot, LOGGING_LEVEL, Util);
 
 
 /* ### PROMISIFY API CALLS - turns e.g. channels.info into channels.infoAsync which returns a promise ### */
@@ -59,20 +59,6 @@ _.forEach(slackApiCategories, (category) => {
 controller.storage.channels = Promise.promisifyAll(controller.storage.channels);
 controller.storage.teams = Promise.promisifyAll(controller.storage.teams);
 controller.storage.users = Promise.promisifyAll(controller.storage.users);
-
-// Helper that should really be part of the slack API to begin with
-//TODO move this into Util or something
-const getUserByName = (userName) => {
-  const strippedID = _.get((/^<@(U[^>]+)>$/).exec(userName), 1);
-  if (strippedID) {
-    return bot.api.users.infoAsync({ user: strippedID })
-      .then(({ user }) => user);
-  }
-
-  return bot.api.users.listAsync({})
-    .then(({ members }) => _.find(members, ({ name }) => name === userName) || null);
-};
-
 
 /* ### INITALIZE BOT ### */
 bot.startRTM((error /* , _bot, _payload */) => {
@@ -133,5 +119,14 @@ registerCommand('help', (message /* , log */) => {
 
 controller.hears([/.+/], ['direct_message', 'direct_mention', 'mention'], (_bot, message) => {
   Util.log('message', `Passively got a mention/message from ${message.user}`, VERBOSE_LOGGING);
-  //TODO allow registering a default behavior here
+  //TODO allow registering a default behavior and help here
 });
+
+module.exports = {
+  Database,
+  Message,
+  Util,
+  helpData,
+  registerCommand,
+  registerHelp
+};
