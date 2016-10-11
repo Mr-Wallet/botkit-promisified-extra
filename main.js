@@ -67,11 +67,35 @@ bot.startRTM((error /* , _bot, _payload */) => {
   }
 });
 
-// TODO automatically register a `help` command and add a parameter here for what gets added to the help
+const helpData = {
+  details: {},
+  summaries: {},
+  summaryOrder: []
+};
+
+/**
+ * @param {String} command The first word the bot hears (see registerCommand)
+ * @param {String} summary [optional] A brief one-liner.
+ *                                    When the bot gets `help` then it replies with a list of all summaries, ordered by
+ *                                    when each command was registered.
+ *                                    NOTE that having a falsy summary will result in a "secret" command.
+ * @param {String} details [optional] A nice long man page.
+ *                                    When the bot gets `help ${command}` then it replies with this.
+ *                                    If falsy, it will just send back the `summary`, if that is truthy.
+ */
+const registerHelp = (command, { details, summary }) => {
+  if (!helpData.summaryOrder.includes(command)) {
+    helpData.summaryOrder.push(command);
+  }
+  helpData.details[command] = details;
+  helpData.summaries[command] = summary;
+};
+
 /**
  * Convenience method for setting up a command that the bot will respond to, complete with easy logging/errors.
  * @param {String} command The first word the bot hears, which is the "command".
- *                         Not case sensitive except for what gets logged.
+ *                         Not case sensitive except for what gets logged and put into the help info.
+ * @param {Object} help An object of shape { details: String, summary: String }. (See registerHelp.)
  * @param {Function} callback What the command does.
  *                            callback takes the arguments (message, log, ...params) where:
  *                              message is the slack API message object
@@ -82,7 +106,9 @@ bot.startRTM((error /* , _bot, _payload */) => {
  * @param {Array | String} types (optional) The 2nd parameter to controller.hears (i.e. the type(s) of message/mention)
  *                               See https://github.com/howdyai/botkit#matching-patterns-and-keywords-with-hears
  */
-const registerCommand = (command, callback, types = ['direct_message']) => {
+const registerCommand = (command, help, callback, types = ['direct_message']) => {
+  registerHelp(command, help);
+
   const commandRegExp = new RegExp(`^${command}(\\b.+)?$`, 'i');
 
   controller.hears([commandRegExp], types, (_bot, message) => {
@@ -101,20 +127,12 @@ const registerCommand = (command, callback, types = ['direct_message']) => {
 };
 
 registerCommand('help', (message /* , log */) => {
-  /* eslint-disable max-len */
-  //TODO generate this automatically
-  Message.private(
-    message.user,
-    'Any time I am mentioned, I\'ll pass it along to the current Squid Pope.' +
-    '\nI will also pass along any direct messages that I don\'t recognize as a command.' +
-    '\nBesides this `help` command, I know the following commands:' +
-    '\n`list` lists the current queue of squid popes.' +
-    '\n`cyclePope` puts the current pope at the end of the queue.' +
-    '\n`deferPope` swaps the current and next popes. Use this when the scheduled pope is unavailable for the week.' +
-    '\n`addPope user-name` adds a user to the end of the squid pope queue.' +
-    '\n`removePope user-name` removes a user from the squid pope queue. *NOTE:* If the current pope is removed, the next user becomes pope but _is not automatically notified._'
+  const helpMessage = _.reduce(
+    helpData.summaryOrder,
+    (result, command) => `\n\`${command}\` ${helpData.summaries[command]}`,
+    'TODO I need a good way to set this message.'
   );
-  /* eslint-enable max-len */
+  Message.private(message.user, helpMessage);
 });
 
 controller.hears([/.+/], ['direct_message', 'direct_mention', 'mention'], (_bot, message) => {
