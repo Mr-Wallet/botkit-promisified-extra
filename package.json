@@ -6,7 +6,7 @@
   "main": "main.js",
   "dependencies": {
     "bluebird": "~3.1.1",
-    "botkit": "~0.2.2",
+    "botkit": "~0.4.9",
     "lodash": "~4.14.1",
     "moment": "~2.14.1"
   },
