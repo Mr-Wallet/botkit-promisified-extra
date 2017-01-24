@@ -2,16 +2,17 @@ const Botkit = require('botkit');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
-const BOT_TOKEN = require('./token.js');
+const BOT_TOKEN = require('./config/token.js');
 const {
   ONLY_ERROR_LOGGING,
   VERBOSE_LOGGING
 } = require('./resources/constants');
 
-const USER_CONFIG = require('./config');
+const USER_CONFIG = require('./config/config');
 const DEFAULT_CONFIG = require('./resources/defaultConfig');
 
 const {
+  HELP_PREAMBLE,
   LOGGING_LEVEL
 } = _.assign({}, DEFAULT_CONFIG, USER_CONFIG);
 
@@ -107,7 +108,9 @@ const registerHelp = (command, { details, summary }) => {
  *                               See https://github.com/howdyai/botkit#matching-patterns-and-keywords-with-hears
  */
 const registerCommand = (command, help, callback, types = ['direct_message']) => {
-  registerHelp(command, help);
+  if (command !== 'help') {
+    registerHelp(command, help);
+  }
 
   const commandRegExp = new RegExp(`^${command}(\\b.+)?$`, 'i');
 
@@ -126,18 +129,19 @@ const registerCommand = (command, help, callback, types = ['direct_message']) =>
   });
 };
 
-registerCommand('help', (message /* , log */) => {
+registerCommand('help', {}, (message /* , log */) => {
   const helpMessage = _.reduce(
     helpData.summaryOrder,
     (result, command) => `\n\`${command}\` ${helpData.summaries[command]}`,
-    'TODO I need a good way to set this message.'
+    HELP_PREAMBLE
   );
   Message.private(message.user, helpMessage);
 });
 
 controller.hears([/.+/], ['direct_message', 'direct_mention', 'mention'], (_bot, message) => {
   Util.log('message', `Passively got a mention/message from ${message.user}`, VERBOSE_LOGGING);
-  //TODO allow registering a default behavior and help here
+  _bot.reply(message, 'I don\'t understand. Say `help` to me for a list of commands.');
+  //TODO allow registering a default behavior here
 });
 
 module.exports = {

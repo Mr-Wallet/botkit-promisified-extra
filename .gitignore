@@ -31,7 +31,7 @@ build/Release
 node_modules
 
 # API token
-token.js
+config/token.js
 
 # Save data
 saveData
